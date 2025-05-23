@@ -17,14 +17,15 @@ echo "Removing image from local repository $CONTAINER_REGISTRY.azurecr.io/$DOCKE
 docker rmi $CONTAINER_REGISTRY.azurecr.io/$DOCKER_CONTAINER:$DOCKER_CONTAINER_TAG
 
 # Create the Azure container instance
-
+echo "create azure container instance"
 CONTAINER_REGISTRY_KEY=$(
     az acr credential show \
     -n $CONTAINER_REGISTRY \
     --query "passwords[0].value" \
     --output tsv \
 )
-
+echo $CONTAINER_REGISTRY_KEY
+echo "create azure key"
 STORAGE_ACCOUNT_KEY=$(
     az storage account keys list \
     --resource-group $RESOURCE_GROUP \
@@ -32,7 +33,7 @@ STORAGE_ACCOUNT_KEY=$(
     --query "[0].value" \
     --output tsv \
 )
-
+echo "create azure container "
 az container create \
     -g $RESOURCE_GROUP \
     --name $DOCKER_CONTAINER \
@@ -42,8 +43,9 @@ az container create \
     --image $CONTAINER_REGISTRY.azurecr.io/$DOCKER_CONTAINER:$DOCKER_CONTAINER_TAG \
     --registry-username $CONTAINER_REGISTRY \
     --registry-password $CONTAINER_REGISTRY_KEY \
-    --cpu 4 \
-    --memory 2 \
+    --os-type Linux \
+    --cpu 1 \
+    --memory 8 \
     --protocol UDP \
     --azure-file-volume-account-name $STORAGE_ACCOUNT \
     --azure-file-volume-account-key $STORAGE_ACCOUNT_KEY \
